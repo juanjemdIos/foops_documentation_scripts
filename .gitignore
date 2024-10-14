@@ -1,0 +1,5 @@
+# Ignorar la carpeta Bin
+Bin/
+
+# Ignorar archivos .DS_Store
+.DS_Store
