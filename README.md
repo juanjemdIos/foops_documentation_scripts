@@ -12,3 +12,10 @@ The process iterates recursively within the root, and if it finds a TTL file, it
 The Mustache template is necessary to create the HTML file, and if any design modifications to the HTML are deemed necessary, they should be made in that template.
 
 The script requires the rdflib and pystache libraries for proper operation. Both are included in the Bin folder.
+
+The main page created from ttl_catalogue.py goes through all test folders and retrieves information to create a catalog item whenever it finds a ttl file in the folder.
+
+It requires specifying the path where the test folders are located and where the template is hosted, from which the catalog will be created.
+
+path_ttls = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/test/' 
+path_mustache = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/plantilla_catalogo.html'.
