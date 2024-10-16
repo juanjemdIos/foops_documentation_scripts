@@ -39,8 +39,8 @@ def ttl_to_item_catalogue(path_ttl, path_mustache, query):
 
 # recorrer las carpetas desde la raiz y obtener los que tengan un ttl
 path_ttls = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/test/'
-path_mustache = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/plantilla_catalogo.html'
-path_catalogo = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/catalogo_test.html'
+path_mustache = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/template_catalog.html'
+path_catalogo = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/catalog.html'
 
 tests = []
 

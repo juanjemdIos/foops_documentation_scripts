@@ -1,10 +1,11 @@
 # foops_documentation_scripts
+
 Repository used to generate the JSON-LD and HTML catalogs for FOOPS!
 
-In order for the script to work correctly, the following paths have been configured: 
-path_ttls = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/test/' 
-path_mustache = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/test/plantilla.html'.
- 
+In order for the script to work correctly, the following paths have been configured:
+path_ttls = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/test/'
+path_mustache = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/test/template.html'.
+
 If the TTL files or the template change location, these paths will need to be updated.
 
 The process iterates recursively within the root, and if it finds a TTL file, it creates an equivalent file with the same name but with HTML and JSON-LD extensions.
@@ -17,5 +18,5 @@ The main page created from ttl_catalogue.py goes through all test folders and re
 
 It requires specifying the path where the test folders are located and where the template is hosted, from which the catalog will be created.
 
-path_ttls = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/test/' 
-path_mustache = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/plantilla_catalogo.html'.
+path_ttls = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/test/'
+path_mustache = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/template_catalog.html'.
