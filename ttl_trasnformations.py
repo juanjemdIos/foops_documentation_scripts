@@ -138,7 +138,7 @@ def ttl_to_jsonld(path_ttl):
 
 
 path_ttls = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/test/'
-path_mustache = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/test/plantilla.html'
+path_mustache = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/test/template.html'
 
 for root, dirs, files in os.walk(path_ttls):
     for file in files:
