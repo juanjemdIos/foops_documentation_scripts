@@ -281,7 +281,7 @@ def iterate_paths(path, template, query, isTest):
 path_ttls_metrics = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/metric/'
 path_ttls = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/test/'
 path_mustache = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/test/template.html'
-path_mustache_metrics = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/metrics/template_metrics.html'
+path_mustache_metrics = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/metric/template_metrics.html'
 
 
 iterate_paths(path_ttls_metrics, path_mustache_metrics, query_metrics, False)
