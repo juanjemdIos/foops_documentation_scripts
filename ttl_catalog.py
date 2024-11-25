@@ -27,13 +27,33 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX dqv: <http://www.w3.org/ns/dqv#>
 PREFIX dcat: <http://www.w3.org/ns/dcat#> 
 
-SELECT DISTINCT ?s ?title ?label ?version ?keywords ?license
+SELECT DISTINCT ?s ?title ?label ?version ?keywords ?license ?license_label
 WHERE {
     ?s a dqv:Metric .
     ?s dcterms:title ?title .
     ?s rdfs:label ?label .
     ?s dcat:version ?version .
     ?s dcat:keyword ?keywords .
+    ?s dcterms:license ?license .
+
+}
+"""
+
+query_benchmark = """
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dqv: <http://www.w3.org/ns/dqv#>
+PREFIX dcat: <http://www.w3.org/ns/dcat#> 
+
+SELECT DISTINCT ?s ?title ?label ?version ?keywords ?license ?license_label
+WHERE {
+    ?s a dav:MetricBenchmark .
+    ?s dcterms:title ?title .
+    ?s rdfs:label ?label .
+    ?s dcat:version ?version .
+    ?s dcat:keyword ?keywords .
+    ?s dcterms:license ?license .
+
 }
 """
 
@@ -69,7 +89,8 @@ def ttl_to_item_catalogue(path_ttl, query):
 
         data['license_label'] = label_license
 
-        keywords.append(str(row.keywords))
+        if str(row.keywords) not in keywords:
+            keywords.append(str(row.keywords))
 
     all_keywords = ", ".join(keywords)
     data['keywords'] = all_keywords
@@ -90,19 +111,23 @@ def item_to_list(path, list, query):
 # github paths
 path_ttls = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/test/'
 path_ttls_metric = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/metric/'
+path_ttls_benchmark = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/benchmark/'
 path_mustache = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/template_catalog.html'
 path_catalogo = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/catalog.html'
 
 
 tests = []
 metrics = []
+benchmarks = []
 
 item_to_list(path_ttls, tests, query)
 item_to_list(path_ttls_metric, metrics, query_metric)
+item_to_list(path_ttls_benchmark, benchmarks, query_benchmark)
 
 # sorted list of test and metrics by name
 tests_sorted = sorted(tests, key=lambda x: x["name"])
 metrics_sorted = sorted(metrics, key=lambda x: x["name"])
+benchmarks_sorted = sorted(benchmarks, key=lambda x: x["name"])
 
 
 # extraer su uri, name y descrpción. El identificador deberá tener como href el html creado en el proceso previo
@@ -112,7 +137,9 @@ with open(path_mustache, 'r') as template_file:
 # sustituir la plantilla con los datos del diccionario
 renderer = pystache.Renderer()
 rendered_output = renderer.render(
-    template_content, {'tests': tests_sorted, 'metrics': metrics_sorted})
+    template_content, {'tests': tests_sorted,
+                       'metrics': metrics_sorted, 'benchmarks': benchmarks_sorted}
+)
 
 with open(path_catalogo, 'w') as output_file:
     output_file.write(rendered_output)
