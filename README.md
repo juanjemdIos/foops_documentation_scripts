@@ -2,13 +2,17 @@
 
 Repository used to generate the JSON-LD and HTML catalogs for FOOPS!
 
-In order for the script to work correctly, the following paths have been configured:
-path_ttls = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/test/'
-path_ttls_metric = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/metric/'
-path_mustache = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/test/template.html'.
-path_mustache_metrics = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/metrics/template_metrics.html'
+In order for the script to work correctly, the following paths have been configured in the config.ini file:
+path_ttls_benchmarks = "https://github.com/oeg-upm/fair_ontologies/tree/main/doc/benchmark/"
+path_ttls_metrics = "https://github.com/oeg-upm/fair_ontologies/tree/main/doc/metric/"
+path_ttls = "https://github.com/oeg-upm/fair_ontologies/tree/main/doc/test/"
+path_mustache = "https://github.com/oeg-upm/fair_ontologies/tree/main/doc/test/template.html"
+path_mustache_metrics = "https://github.com/oeg-upm/fair_ontologies/tree/main/doc/metric/template_metrics.html"
+path_mustache_benchmarks = "https://github.com/oeg-upm/fair_ontologies/tree/main/doc/benchmark/template_benchmark.html"
+path_mustache_catalogo = "https://github.com/oeg-upm/fair_ontologies/tree/main/doc/catalog.html"
+path_catalogo = "https://github.com/oeg-upm/fair_ontologies/tree/main/doc/catalog.html"
 
-If the TTL files or the template change location, these paths will need to be updated.
+If the TTL files or the template change location, these paths will need to be updated in the config file.
 
 The process iterates recursively within the root, and if it finds a TTL file, it creates an equivalent file with the same name but with HTML and JSON-LD extensions.
 
@@ -22,4 +26,5 @@ It requires specifying the path where the test and metric folders are located an
 
 path_ttls = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/test/'
 path_ttls_metric = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/metric/'
+path_ttls_benchmarks = "https://github.com/oeg-upm/fair_ontologies/tree/main/doc/benchmark/"
 path_mustache = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/template_catalog.html'.

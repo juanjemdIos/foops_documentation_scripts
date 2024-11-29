@@ -1,7 +1,7 @@
 from rdflib import Graph
 import pystache
 import os
-
+import configparser
 # query para extraer los tres datos que necesitamos de cada ttl para mostrar en el catálogo de test y de metrics
 
 query = """
@@ -44,10 +44,11 @@ PREFIX dcterms: <http://purl.org/dc/terms/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX dqv: <http://www.w3.org/ns/dqv#>
 PREFIX dcat: <http://www.w3.org/ns/dcat#> 
+PREFIX ftr: <https://www.w3id.org/ftr#>
 
 SELECT DISTINCT ?s ?title ?label ?version ?keywords ?license ?license_label
 WHERE {
-    ?s a dav:MetricBenchmark .
+    ?s a ftr:Benchmark .
     ?s dcterms:title ?title .
     ?s rdfs:label ?label .
     ?s dcat:version ?version .
@@ -109,20 +110,42 @@ def item_to_list(path, list, query):
 
 # recorrer las carpetas desde la raiz y obtener los que tengan un ttl
 # github paths
-path_ttls = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/test/'
-path_ttls_metric = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/metric/'
-path_ttls_benchmark = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/benchmark/'
-path_mustache = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/template_catalog.html'
-path_catalogo = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/catalog.html'
+# path_ttls = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/test/'
+# path_ttls_metric = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/metric/'
+# path_ttls_benchmark = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/benchmark/'
+# path_mustache = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/template_catalog.html'
+# path_catalogo = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/catalog.html'
 
+# path_ttls = '/Users/mbp_jjm/Documents/DOCUMENTACION UPM/Fair_Ontologies/doc/test/'
+# path_ttls_metric = '/Users/mbp_jjm/Documents/DOCUMENTACION UPM/Fair_Ontologies/doc/metric/'
+# path_ttls_benchmark = '/Users/mbp_jjm/Documents/DOCUMENTACION UPM/Fair_Ontologies/doc/benchmark/'
+# path_mustache = '/Users/mbp_jjm/Documents/DOCUMENTACION UPM/Fair_Ontologies/doc/template_catalog.html'
+# path_catalogo = '/Users/mbp_jjm/Documents/DOCUMENTACION UPM/Fair_Ontologies/doc/catalog.html'
+
+# Cargar la configuración
+config = configparser.ConfigParser()
+config.read('config.ini')
+
+# get paths
+# template mustache
+path_mustache_catalogo = config.get(
+    'Paths', 'path_mustache_catalogo').strip('"')
+
+# ttls test, metrics and benchmark
+path_ttls = config.get('Paths', 'path_ttls').strip('"')
+path_ttls_benchmarks = config.get('Paths', 'path_ttls_benchmarks').strip('"')
+path_ttls_metrics = config.get('Paths', 'path_ttls_metrics').strip('"')
+
+# html catalog
+path_catalogo = config.get('Paths', 'path_catalogo').strip('"')
 
 tests = []
 metrics = []
 benchmarks = []
 
 item_to_list(path_ttls, tests, query)
-item_to_list(path_ttls_metric, metrics, query_metric)
-item_to_list(path_ttls_benchmark, benchmarks, query_benchmark)
+item_to_list(path_ttls_metrics, metrics, query_metric)
+item_to_list(path_ttls_benchmarks, benchmarks, query_benchmark)
 
 # sorted list of test and metrics by name
 tests_sorted = sorted(tests, key=lambda x: x["name"])
@@ -131,7 +154,7 @@ benchmarks_sorted = sorted(benchmarks, key=lambda x: x["name"])
 
 
 # extraer su uri, name y descrpción. El identificador deberá tener como href el html creado en el proceso previo
-with open(path_mustache, 'r') as template_file:
+with open(path_mustache_catalogo, 'r') as template_file:
     template_content = template_file.read()
 
 # sustituir la plantilla con los datos del diccionario
