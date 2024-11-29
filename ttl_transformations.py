@@ -1,9 +1,9 @@
 from rdflib import Graph
 import pystache
 import os
-import logging
-# query sparql para obtneer los valores del test
+import configparser
 
+# query test
 query = """
 PREFIX dcterms: <http://purl.org/dc/terms/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -14,7 +14,7 @@ PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX doap: <http://usefulinc.com/ns/doap#>
 
 SELECT DISTINCT ?s ?title ?label ?description ?keywords ?version ?indicator ?label_indicator ?desc_indicator ?license
-?publisher ?metric ?creator_name ?creator_orcid
+?publisher ?metric ?creator_name ?creator_orcid ?contact_orcid ?contact_name ?contact_mail
 ?web_repository
 WHERE {
     ?s a ftr:Test .
@@ -33,6 +33,9 @@ WHERE {
     ?repo foaf:homePage ?web_repository .
     ?s dcterms:creator ?creator_orcid .
     ?creator_orcid vcard:fn ?creator_name .
+    ?s dcat:contactPoint ?contact_orcid .
+    ?contact_orcid vcard:fn ?contact_name .
+    ?contact_orcid vcard:hasEmail ?contact_mail .
 }
 """
 
@@ -45,10 +48,9 @@ PREFIX dqv: <http://www.w3.org/ns/dqv#>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX doap: <http://usefulinc.com/ns/doap#>
 PREFIX dqv: <http://www.w3.org/ns/dqv#>
-PREFIX dav: <https://example.org/ontology#>
 
 SELECT DISTINCT ?s ?title ?label ?description ?keywords ?version ?license ?indimension ?label_dimension ?desc_indimension
-?publisher ?test ?creator_name ?creator_orcid ?landing_page ?benchmark ?bm_title ?bm_desc ?metric_status
+?publisher ?test ?creator_name ?creator_orcid ?landing_page ?benchmark ?bm_title ?bm_desc ?metric_status ?contact_orcid ?contact_name ?contact_mail
 WHERE {
     ?s a dqv:Metric .
     ?s dcterms:title ?title .
@@ -64,12 +66,15 @@ WHERE {
     ?s ftr:hasBenchmark ?benchmark .
     ?indimension rdfs:label ?label_dimension .
     ?indimension dcterms:description ?desc_indimension .
-    ?benchmark a dav:MetricBenchmark ;
+    ?benchmark a ftr:Benchmark ;
         dcterms:title ?bm_title;
         dcterms:description ?bm_desc .
     ?test a ftr:Test .
     ?s dcterms:creator ?creator_orcid .
     ?creator_orcid vcard:fn ?creator_name .
+    ?s dcat:contactPoint ?contact_orcid .
+    ?contact_orcid vcard:fn ?contact_name .
+    ?contact_orcid vcard:hasEmail ?contact_mail .
 }
 """
 
@@ -82,12 +87,11 @@ PREFIX dqv: <http://www.w3.org/ns/dqv#>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX doap: <http://usefulinc.com/ns/doap#>
 PREFIX dqv: <http://www.w3.org/ns/dqv#>
-PREFIX dav: <https://example.org/ontology#>
 
 SELECT DISTINCT ?s ?title ?label ?description ?keywords ?version ?license
- ?creator_name ?creator_orcid ?landing_page ?benchmark_status ?associatedMetric ?metricIdentifier ?metricLabel
+ ?creator_name ?creator_orcid ?landing_page ?benchmark_status ?associatedMetric ?metricIdentifier ?metricLabel ?contact_orcid ?contact_name ?contact_mail
 WHERE {
-    ?s a dav:MetricBenchmark .
+    ?s a ftr:Benchmark .
     ?s dcterms:title ?title .
     ?s rdfs:label ?label .
     ?s dcterms:description ?description .
@@ -101,9 +105,11 @@ WHERE {
     ?s ftr:associatedMetric ?associatedMetric .
     ?associatedMetric dcterms:identifier ?metricIdentifier .
     ?associatedMetric rdfs:label ?metricLabel .
+    ?s dcat:contactPoint ?contact_orcid .
+    ?contact_orcid vcard:fn ?contact_name .
+    ?contact_orcid vcard:hasEmail ?contact_mail .
 }
 """
-# ?metric dqv:Metric .
 
 
 def ttl_to_html(path_ttl, path_mustache, query):
@@ -128,7 +134,9 @@ def ttl_to_html(path_ttl, path_mustache, query):
         'test_metric': '',
         'test_repository': '',
         'test_creators': '',
-        'test_turtle': ''
+        'test_turtle': '',
+        'test_contactName': '',
+        'test_contactMail': ''
     }
 
     # como hay varias keywords normalemnte, las meto en un array y luego las uno en un string separadas por comas.
@@ -137,6 +145,11 @@ def ttl_to_html(path_ttl, path_mustache, query):
     # lo mismo ocurre con los creadores que son dos
     creators = []
     creators_orcid = []
+
+    contacts = []
+    contacts_orcid = []
+    contacts_mail = []
+
     for row in results:
 
         data['test_identifier'] = row.s
@@ -162,6 +175,15 @@ def ttl_to_html(path_ttl, path_mustache, query):
         if str(row.creator_orcid) not in creators_orcid:
             creators_orcid.append(str(row.creator_orcid))
 
+        if str(row.contact_name) not in contacts:
+            contacts.append(str(row.contact_name))
+
+        if str(row.contact_orcid) not in contacts_orcid:
+            contacts_orcid.append(str(row.contact_orcid))
+
+        if str(row.contact_mail) not in contacts_mail:
+            contacts_mail.append(str(row.contact_mail))
+
     all_keywords = ", ".join(keywords)
 
     # hay que hacer una transformación porque ahora tenemos dos arrays con los nombres y el orcid que debe ser el a href y queremos que aparecca esto:
@@ -169,7 +191,14 @@ def ttl_to_html(path_ttl, path_mustache, query):
     for nombre, orcid in zip(creators, creators_orcid):
         result.append(f'<a href="{orcid}" target="_blank">{nombre}</a>')
 
+    result_contacts = []
+    for nombre, mail, orcid in zip(contacts, contacts_mail, contacts_orcid):
+        clean_mail = mail.replace('mailto:', '')
+        result_contacts.append(
+            f'<a href="{orcid}" target="_blank">{nombre}</a>: <a href="{mail}" target="_blank">{clean_mail}</a>')
+
     all_creators = ', '.join(result)
+    all_contacts = ', '.join(result_contacts)
 
     data['test_keywords'] = all_keywords
     # en mustache he tenido que crear el mapeo con {{{test_creators}}} que asigna correctamente el texto.
@@ -177,7 +206,7 @@ def ttl_to_html(path_ttl, path_mustache, query):
     # único que quería mostrar es el nombre.
 
     data['test_creators'] = all_creators
-
+    data['test_contactPoint'] = all_contacts
     # Cargar la plantilla mustache
     with open(path_mustache, 'r') as template_file:
         template_content = template_file.read()
@@ -228,7 +257,9 @@ def ttl_to_html_benchmarks(path_ttl, path_mustache, query):
         'benchmark_landing_page': '',
         'benchmark_metrics': '',
         'benchmark_status': '',
-        'benchmark_turtle': ''
+        'benchmark_turtle': '',
+        'benchmark_contactName': '',
+        'benchmark_contactMail': ''
     }
 
     # como hay varias keywords normalemnte, las meto en un array y luego las uno en un string separadas por comas.
@@ -240,6 +271,10 @@ def ttl_to_html_benchmarks(path_ttl, path_mustache, query):
 
     metrics = []
     metrics_uri = []
+
+    contacts = []
+    contacts_orcid = []
+    contacts_mail = []
 
     for row in results:
 
@@ -268,6 +303,15 @@ def ttl_to_html_benchmarks(path_ttl, path_mustache, query):
         if str(row.metricLabel) not in metrics:
             metrics.append(str(row.metricLabel))
 
+        if str(row.contact_name) not in contacts:
+            contacts.append(str(row.contact_name))
+
+        if str(row.contact_orcid) not in contacts_orcid:
+            contacts_orcid.append(str(row.contact_orcid))
+
+        if str(row.contact_mail) not in contacts_mail:
+            contacts_mail.append(str(row.contact_mail))
+
         all_keywords = ", ".join(keywords)
 
         result = []
@@ -279,14 +323,21 @@ def ttl_to_html_benchmarks(path_ttl, path_mustache, query):
             resultMetrics.append(
                 f'<a href="{uriMetric}" target="_blank">{nameMetric}</a>')
 
+        result_contacts = []
+        for nombre, mail, orcid in zip(contacts, contacts_mail, contacts_orcid):
+            clean_mail = mail.replace('mailto:', '')
+            result_contacts.append(
+                f'<a href="{orcid}" target="_blank">{nombre}</a>: <a href="{mail}" target="_blank">{clean_mail}</a>')
+
         all_creators = ', '.join(result)
         all_metrics = ', '.join(resultMetrics)
+        all_contacts = ', '.join(result_contacts)
 
     data['benchmark_keywords'] = all_keywords
-
     data['benchmark_creators'] = all_creators
-
     data['benchmark_metrics'] = all_metrics
+    data['benchmark_contactPoint'] = all_contacts
+
     # Cargar la plantilla mustache
     with open(path_mustache, 'r') as template_file:
         template_content = template_file.read()
@@ -308,7 +359,7 @@ def ttl_to_html_metrics(path_ttl, path_mustache, query):
 
     g = Graph()
     g.parse(path_ttl, format="turtle")
-    # Ejecutar la consulta
+
     results = g.query(query)
 
     data = {
@@ -330,15 +381,24 @@ def ttl_to_html_metrics(path_ttl, path_mustache, query):
         'metric_benchmark_title': '',
         'metric_benchmark_desc': '',
         'metric_status': '',
-        'metric_turtle': ''
+        'metric_turtle': '',
+        'metric_contactName': '',
+        'metric_contactMail': ''
     }
 
     # como hay varias keywords normalemnte, las meto en un array y luego las uno en un string separadas por comas.
     keywords = []
-
+    benchmarks = []
+    benchmarks_title = []
+    benchmarks_desc = []
     # lo mismo ocurre con los creadores que son dos
     creators = []
     creators_orcid = []
+
+    contacts = []
+    contacts_orcid = []
+    contacts_mail = []
+
     for row in results:
 
         data['metric_identifier'] = row.s
@@ -353,9 +413,6 @@ def ttl_to_html_metrics(path_ttl, path_mustache, query):
         data['metric_publisher'] = row.publisher
         data['metric_test'] = row.test
         data['metric_landing_page'] = row.landing_page
-        data['metric_benchmark'] = row.benchmark
-        data['metric_benchmark_title'] = row.bm_title
-        data['metric_benchmark_desc'] = row.bm_desc
         data['metric_status'] = row.metric_status
         data['metric_turtle'] = row.label.replace('Metric ', '') + '.ttl'
 
@@ -368,18 +425,46 @@ def ttl_to_html_metrics(path_ttl, path_mustache, query):
         if str(row.creator_orcid) not in creators_orcid:
             creators_orcid.append(str(row.creator_orcid))
 
+        if str(row.benchmark) not in benchmarks:
+            benchmarks.append(str(row.benchmark))
+        if str(row.bm_title) not in benchmarks_title:
+            benchmarks_title.append(str(row.bm_title))
+        if str(row.bm_desc) not in benchmarks_desc:
+            benchmarks_desc.append(str(row.bm_desc))
+
+        if str(row.contact_name) not in contacts:
+            contacts.append(str(row.contact_name))
+        if str(row.contact_orcid) not in contacts_orcid:
+            contacts_orcid.append(str(row.contact_orcid))
+        if str(row.contact_mail) not in contacts_mail:
+            contacts_mail.append(str(row.contact_mail))
+
     all_keywords = ", ".join(keywords)
 
     result = []
     for nombre, orcid in zip(creators, creators_orcid):
         result.append(f'<a href="{orcid}" target="_blank">{nombre}</a>')
 
+    result_benchmarks = []
+    #  <a href="{{metric_benchmark}}" target="_blank"> {{metric_benchmark_title}} </a>: {{metric_benchmark_desc}}
+    for benchmark, title, desc in zip(benchmarks, benchmarks_title, benchmarks_desc):
+        result_benchmarks.append(
+            f'<a href="{benchmark}" target="_blank">{title}</a>: {desc}')
+
+    result_contacts = []
+    for nombre, mail, orcid in zip(contacts, contacts_mail, contacts_orcid):
+        clean_mail = mail.replace('mailto:', '')
+        result_contacts.append(
+            f'<a href="{orcid}" target="_blank">{nombre}</a>: <a href="{mail}" target="_blank">{clean_mail}</a>')
+
     all_creators = ', '.join(result)
+    all_benchmarks = '<br>'.join(result_benchmarks)
+    all_contacts = ', '.join(result_contacts)
 
     data['metric_keywords'] = all_keywords
-
     data['metric_creators'] = all_creators
-
+    data['metric_benchmarks'] = all_benchmarks
+    data['metric_contactPoint'] = all_contacts
     # Cargar la plantilla mustache
     with open(path_mustache, 'r') as template_file:
         template_content = template_file.read()
@@ -425,21 +510,21 @@ def iterate_paths(path, template, query, typeDoc):
                 ttl_to_jsonld(path_ttl)
 
 
-# github paths
-path_ttls_benchmarks = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/benchmark/'
-path_ttls_metrics = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/metric/'
-path_ttls = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/test/'
-path_mustache = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/test/template.html'
-path_mustache_metrics = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/metric/template_metrics.html'
-path_mustache_benchmarks = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/benchmark/template_benchmark.html'
+# Cargar la configuración
+config = configparser.ConfigParser()
+config.read('config.ini')
 
-# path_ttls_benchmarks = '/Users/mbp_jjm/Documents/DOCUMENTACION UPM/Fair_Ontologies/doc/benchmark/'
-# path_ttls_metrics = '/Users/mbp_jjm/Documents/DOCUMENTACION UPM/Fair_Ontologies/doc/metric/'
-# path_ttls = '/Users/mbp_jjm/Documents/DOCUMENTACION UPM/Fair_Ontologies/doc/test/'
-# path_mustache = '/Users/mbp_jjm/Documents/DOCUMENTACION UPM/Fair_Ontologies/doc/test/template.html'
-# path_mustache_metrics = '/Users/mbp_jjm/Documents/DOCUMENTACION UPM/Fair_Ontologies/doc/metric/template_metrics.html'
-# path_mustache_benchmarks = '/Users/mbp_jjm/Documents/DOCUMENTACION UPM/Fair_Ontologies/doc/benchmark/template_benchmark.html'
+# get paths
+# template mustache
+path_mustache = config.get('Paths', 'path_mustache').strip('"')
+path_mustache_metrics = config.get('Paths', 'path_mustache_metrics').strip('"')
+path_mustache_benchmarks = config.get(
+    'Paths', 'path_mustache_benchmarks').strip('"')
 
+# ttls test, metrics and benchmark
+path_ttls = config.get('Paths', 'path_ttls').strip('"')
+path_ttls_benchmarks = config.get('Paths', 'path_ttls_benchmarks').strip('"')
+path_ttls_metrics = config.get('Paths', 'path_ttls_metrics').strip('"')
 
 iterate_paths(path_ttls_metrics, path_mustache_metrics, query_metrics, 'M')
 iterate_paths(path_ttls, path_mustache, query, 'T')
