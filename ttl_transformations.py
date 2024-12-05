@@ -2,6 +2,7 @@ from rdflib import Graph
 import pystache
 import os
 import configparser
+import markdown
 
 # query test
 query = """
@@ -155,7 +156,7 @@ def ttl_to_html(path_ttl, path_mustache, query):
         data['test_identifier'] = row.s
         data['test_title'] = row.title
         data['test_name'] = row.label
-        data['test_description'] = row.description
+        data['test_description'] = markdown.markdown(row.description)
         data['test_version'] = row.version
         data['test_uri_indicator'] = row.indicator
         data['test_indicator'] = row.label_indicator
@@ -281,7 +282,7 @@ def ttl_to_html_benchmarks(path_ttl, path_mustache, query):
         data['benchmark_identifier'] = row.s
         data['benchmark_title'] = row.title
         data['benchmark_name'] = row.label
-        data['benchmark_description'] = row.description
+        data['benchmark_description'] = markdown.markdown(row.description)
         data['benchmark_version'] = row.version
         data['benchmark_license'] = row.license
         data['benchmark_landing_page'] = row.landing_page
@@ -404,7 +405,7 @@ def ttl_to_html_metrics(path_ttl, path_mustache, query):
         data['metric_identifier'] = row.s
         data['metric_title'] = row.title
         data['metric_name'] = row.label
-        data['metric_description'] = row.description
+        data['metric_description'] = markdown.markdown(row.description)
         data['metric_version'] = row.version
         data['metric_license'] = row.license
         data['metric_uri_inDimension'] = row.indimension

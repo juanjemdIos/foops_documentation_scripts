@@ -28,3 +28,5 @@ path_ttls = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/test/'
 path_ttls_metric = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/metric/'
 path_ttls_benchmarks = "https://github.com/oeg-upm/fair_ontologies/tree/main/doc/benchmark/"
 path_mustache = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/template_catalog.html'.
+
+By using Markdown within the TTL file, we can customize the formatting of descriptions for all document types (tests, metrics, and benchmarks), resulting in a more user-friendly HTML presentation.
