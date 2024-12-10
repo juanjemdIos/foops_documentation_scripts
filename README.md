@@ -33,4 +33,14 @@ path_ttls_metric = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/met
 path_ttls_benchmarks = "https://github.com/oeg-upm/fair_ontologies/tree/main/doc/benchmark/"
 path_mustache = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/template_catalog.html'.
 ```
+
 By using Markdown within the TTL file, we can customize the formatting of descriptions for all document types (tests, metrics, and benchmarks), resulting in a more user-friendly HTML presentation.
+
+It is possible to register the tests hosted in the GitHub repository in Ostrils (https://tools.ostrails.eu) using the test_register script. All you need to do is configure the paths in the configuration file that the other scripts use. Specifically, these two paths:
+
+```
+path_url_register = "https://tools.ostrails.eu/fdp-index-proxy/proxy"
+path_github_api_url = "https://api.github.com/repos/oeg-upm/fair_ontologies/contents/doc/test"
+```
+
+The script will register all the TTL files located in the configured path. If the test already exists in the registry, it will be modified.
