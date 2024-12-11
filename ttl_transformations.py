@@ -514,13 +514,15 @@ def iterate_paths(path, template, query, typeDoc):
 # Cargar la configuración
 config = configparser.ConfigParser()
 config.read('config.ini')
-
+current_dir = os.path.dirname(os.path.abspath(__file__))
 # get paths
 # template mustache
-path_mustache = config.get('Paths', 'path_mustache').strip('"')
-path_mustache_metrics = config.get('Paths', 'path_mustache_metrics').strip('"')
-path_mustache_benchmarks = config.get(
-    'Paths', 'path_mustache_benchmarks').strip('"')
+path_mustache_test = os.path.join(
+    current_dir, "templates/template_test.html")
+path_mustache_metrics = os.path.join(
+    current_dir, "templates/template_metrics.html")
+path_mustache_benchmarks = os.path.join(
+    current_dir, "templates/template_benchmark.html")
 
 # ttls test, metrics and benchmark
 path_ttls = config.get('Paths', 'path_ttls').strip('"')
@@ -528,6 +530,6 @@ path_ttls_benchmarks = config.get('Paths', 'path_ttls_benchmarks').strip('"')
 path_ttls_metrics = config.get('Paths', 'path_ttls_metrics').strip('"')
 
 iterate_paths(path_ttls_metrics, path_mustache_metrics, query_metrics, 'M')
-iterate_paths(path_ttls, path_mustache, query, 'T')
+iterate_paths(path_ttls, path_mustache_test, query, 'T')
 iterate_paths(path_ttls_benchmarks, path_mustache_benchmarks,
               query_benchmarks, 'B')

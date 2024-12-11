@@ -144,7 +144,8 @@ def items_to_register(test):
             if response.status_code == 200:
                 print(f"Test: {str(item['identifier'])} registered OK")
             else:
-                print(f"Error registering: {str(item['identifier'])}")
+                print(
+                    f"Error registering {str(item['identifier'])}: {response.reason}")
 
         except requests.exceptions.RequestException as e:
             print(

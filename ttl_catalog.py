@@ -108,14 +108,17 @@ def item_to_list(path, list, query):
                 list.append(ttl_to_item_catalogue(path_ttl, query))
 
 
+current_dir = os.path.dirname(os.path.abspath(__file__))
 # Cargar la configuración
 config = configparser.ConfigParser()
 config.read('config.ini')
 
 # get paths
 # template mustache
-path_mustache_catalogo = config.get(
-    'Paths', 'path_mustache_catalogo').strip('"')
+
+# Construye el path completo al archivo
+path_mustache_catalogo = os.path.join(
+    current_dir, "templates/template_catalog.html")
 
 # ttls test, metrics and benchmark
 path_ttls = config.get('Paths', 'path_ttls').strip('"')
