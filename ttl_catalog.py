@@ -108,20 +108,6 @@ def item_to_list(path, list, query):
                 list.append(ttl_to_item_catalogue(path_ttl, query))
 
 
-# recorrer las carpetas desde la raiz y obtener los que tengan un ttl
-# github paths
-# path_ttls = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/test/'
-# path_ttls_metric = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/metric/'
-# path_ttls_benchmark = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/benchmark/'
-# path_mustache = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/template_catalog.html'
-# path_catalogo = 'https://github.com/oeg-upm/fair_ontologies/tree/main/doc/catalog.html'
-
-# path_ttls = '/Users/mbp_jjm/Documents/DOCUMENTACION UPM/Fair_Ontologies/doc/test/'
-# path_ttls_metric = '/Users/mbp_jjm/Documents/DOCUMENTACION UPM/Fair_Ontologies/doc/metric/'
-# path_ttls_benchmark = '/Users/mbp_jjm/Documents/DOCUMENTACION UPM/Fair_Ontologies/doc/benchmark/'
-# path_mustache = '/Users/mbp_jjm/Documents/DOCUMENTACION UPM/Fair_Ontologies/doc/template_catalog.html'
-# path_catalogo = '/Users/mbp_jjm/Documents/DOCUMENTACION UPM/Fair_Ontologies/doc/catalog.html'
-
 # Cargar la configuración
 config = configparser.ConfigParser()
 config.read('config.ini')
