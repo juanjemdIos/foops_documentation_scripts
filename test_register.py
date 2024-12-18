@@ -4,16 +4,11 @@ script to upload test to https://tools.ostrails.eu/fdp-index
 '''
 import os
 import configparser
+import time
+import argparse
 import requests
 from rdflib import Graph
 
-config = configparser.ConfigParser()
-config.read('config.ini')
-
-# github_api_url = config.get('Paths', 'path_github_api_url').strip('"')
-urlRegister = config.get('Paths', 'path_url_register').strip('"')
-path_ttls = config.get('Paths', 'path_ttls').strip('"')
-tests = []
 
 QUERY = """
 PREFIX dcterms: <http://purl.org/dc/terms/>
@@ -32,14 +27,18 @@ WHERE {
 }
 """
 
-print(f"URL: {urlRegister}")
-
 
 def fetch_github_files(base_url):
     '''
-        In construcction. Has been discarted because better features of local methods than working directly with api of github
+        In construcction. Has been discarted because better features of local methods 
+        than working directly with api of github
         iterate repo github with test ttl
     '''
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+
+    url_register = config.get('Paths', 'path_url_register').strip('"')
+
     response = requests.get(base_url, timeout=60)
 
     if response.status_code == 200:
@@ -56,7 +55,7 @@ def fetch_github_files(base_url):
 
                 try:
                     response = requests.post(
-                        urlRegister, json=client_url, headers=headers, timeout=60)
+                        url_register, json=client_url, headers=headers, timeout=60)
                     # Imprimir detalles
                     print(f"File found: {client_url}")
                     print(f"Response Status Code: {response.status_code}")
@@ -114,7 +113,7 @@ def item_to_list(path, plist, pquery):
     '''
         add items to test array
     '''
-    for root, dirs, files in os.walk(path):
+    for root, _, files in os.walk(path):
         for file in files:
             if file.endswith(".ttl"):
                 # si encontramos el archivo ttl podemos llamar a las funciones de transformacion
@@ -126,19 +125,23 @@ def items_to_register(test):
     '''
         iterate test array and register every item in ostrails
     '''
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+
+    url_register = config.get('Paths', 'path_url_register').strip('"')
+    print(f"URL: {url_register}")
 
     for item in test:
 
         client_url = {"clientUrl": str(item['identifier'])}
         headers = {"Content-Type": "application/json"}
 
+        # print(client_url)
         try:
             response = requests.post(
-                urlRegister, json=client_url, headers=headers, timeout=60)
+                url_register, json=client_url, headers=headers, timeout=60)
             # Imprimir detalles
             print(f"File found: {client_url}")
-            # print(f"Request URL: {response.url}")
-            # print(f"Request Headers: {response.request.headers}")
             print(f"Response Status Code: {response.status_code}")
             # print(f"Response Body: {response.text}\n")
             if response.status_code == 200:
@@ -147,13 +150,34 @@ def items_to_register(test):
                 print(
                     f"Error registering {str(item['identifier'])}: {response.reason}")
 
+            time.sleep(1)
+
         except requests.exceptions.RequestException as e:
             print(
                 f"Error processing the file {str(item['identifier'])}: {e}")
 
 
-print("----- START of the process ------")
-item_to_list(path_ttls, tests, QUERY)
-items_to_register(tests)
-# fetch_github_files(github_api_url)
-print("----- END of the process ------")
+def main():
+    ''' 
+        init register process
+    '''
+
+    parser = argparse.ArgumentParser(description="Script managed files .ttl")
+    parser.add_argument(
+        '-i', help="Source folder where the TTL files for the tests are located. Use to be ../doc/test/", required=True)
+
+    args = parser.parse_args()
+    path_source = args.i
+
+    tests = []
+
+    print("----- START of the process ------")
+    item_to_list(path_source, tests, QUERY)
+    items_to_register(tests)
+    # fetch_github_files(github_api_url)
+
+    print("----- END of the process ------")
+
+
+if __name__ == "__main__":
+    main()

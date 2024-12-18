@@ -2,6 +2,8 @@ from rdflib import Graph
 import pystache
 import os
 import configparser
+import argparse
+import sys
 # query para extraer los tres datos que necesitamos de cada ttl para mostrar en el catálogo de test y de metrics
 
 query = """
@@ -59,12 +61,12 @@ WHERE {
 """
 
 
-def ttl_to_item_catalogue(path_ttl, query):
+def ttl_to_item_catalogue(path_ttl, pquery):
 
     g = Graph()
     g.parse(path_ttl, format="turtle")
     # Ejecutar la consulta
-    results = g.query(query)
+    results = g.query(pquery)
 
     data = {}
     keywords = []
@@ -99,8 +101,21 @@ def ttl_to_item_catalogue(path_ttl, query):
     return data
 
 
-def item_to_list(path, list, query):
-    for root, dirs, files in os.walk(path):
+def item_to_list(path, list, query, type_doc):
+
+    match type_doc:
+        case "T":
+            subfolder = 'test'
+        case "M":
+            subfolder = 'metric'
+        case "B":
+            subfolder = 'benchmark'
+        case _:
+            print("Unknown type doc")
+
+    path_source = os.path.join(path, subfolder)
+
+    for root, _, files in os.walk(path_source):
         for file in files:
             if file.endswith(".ttl"):
                 # si encontramos el archivo ttl podemos llamar a las funciones de transformacion
@@ -108,50 +123,67 @@ def item_to_list(path, list, query):
                 list.append(ttl_to_item_catalogue(path_ttl, query))
 
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-# Cargar la configuración
-config = configparser.ConfigParser()
-config.read('config.ini')
+def main():
+    ''' 
+        init function
+    '''
+    parser = argparse.ArgumentParser(description="Script managed files .ttl")
+    parser.add_argument('-i', help="Source path of ttls", required=True)
+    parser.add_argument(
+        '-o', help="Destination path of files ttl, html and json-ld", required=False)
 
-# get paths
-# template mustache
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    config = configparser.ConfigParser()
+    config.read('config.ini')
 
-# Construye el path completo al archivo
-path_mustache_catalogo = os.path.join(
-    current_dir, "templates/template_catalog.html")
+    args = parser.parse_args()
+    path_source = args.i
+    path_destination = args.o
 
-# ttls test, metrics and benchmark
-path_ttls = config.get('Paths', 'path_ttls').strip('"')
-path_ttls_benchmarks = config.get('Paths', 'path_ttls_benchmarks').strip('"')
-path_ttls_metrics = config.get('Paths', 'path_ttls_metrics').strip('"')
+    print(f"Using path_source: {path_source}")
+    print(f"Using path_destination: {path_destination}")
 
-# html catalog
-path_catalogo = config.get('Paths', 'path_catalogo').strip('"')
+    # Construye el path completo al archivo
+    path_mustache_catalogo = os.path.join(
+        current_dir, "templates/template_catalog.html")
 
-tests = []
-metrics = []
-benchmarks = []
+    # ttls test, metrics and benchmark
+    # path_ttls = config.get('Paths', 'path_ttls').strip('"')
+    # path_ttls_benchmarks = config.get('Paths', 'path_ttls_benchmarks').strip('"')
+    # path_ttls_metrics = config.get('Paths', 'path_ttls_metrics').strip('"')
 
-item_to_list(path_ttls, tests, query)
-item_to_list(path_ttls_metrics, metrics, query_metric)
-item_to_list(path_ttls_benchmarks, benchmarks, query_benchmark)
+    # html catalog
+    path_catalogo = config.get('Paths', 'path_catalogo').strip('"')
 
-# sorted list of test and metrics by name
-tests_sorted = sorted(tests, key=lambda x: x["name"])
-metrics_sorted = sorted(metrics, key=lambda x: x["name"])
-benchmarks_sorted = sorted(benchmarks, key=lambda x: x["name"])
+    tests = []
+    metrics = []
+    benchmarks = []
+
+    # item_to_list(path_ttls, tests, query)
+    # item_to_list(path_ttls_metrics, metrics, query_metric)
+    # item_to_list(path_ttls_benchmarks, benchmarks, query_benchmark)
+
+    item_to_list(path_source, tests, query, "T")
+    item_to_list(path_source, metrics, query_metric, "M")
+    item_to_list(path_source, benchmarks, query_benchmark, "B")
+    # sorted list of test and metrics by name
+    tests_sorted = sorted(tests, key=lambda x: x["name"])
+    metrics_sorted = sorted(metrics, key=lambda x: x["name"])
+    benchmarks_sorted = sorted(benchmarks, key=lambda x: x["name"])
+
+    # extraer su uri, name y descrpción. El identificador deberá tener como href el html creado en el proceso previo
+    with open(path_mustache_catalogo, 'r') as template_file:
+        template_content = template_file.read()
+
+    # sustituir la plantilla con los datos del diccionario
+    renderer = pystache.Renderer()
+    rendered_output = renderer.render(
+        template_content, {'tests': tests_sorted,
+                           'metrics': metrics_sorted, 'benchmarks': benchmarks_sorted})
+
+    with open(path_catalogo, 'w') as output_file:
+        output_file.write(rendered_output)
 
 
-# extraer su uri, name y descrpción. El identificador deberá tener como href el html creado en el proceso previo
-with open(path_mustache_catalogo, 'r') as template_file:
-    template_content = template_file.read()
-
-# sustituir la plantilla con los datos del diccionario
-renderer = pystache.Renderer()
-rendered_output = renderer.render(
-    template_content, {'tests': tests_sorted,
-                       'metrics': metrics_sorted, 'benchmarks': benchmarks_sorted}
-)
-
-with open(path_catalogo, 'w') as output_file:
-    output_file.write(rendered_output)
+if __name__ == "__main__":
+    main()

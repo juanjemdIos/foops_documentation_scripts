@@ -50,33 +50,52 @@
                     $keywords.html(formattedKeywords);
                 });
 
-                function showSection(uri) {
-                    const sections = {
-                        "https://w3id.org/foops/test/": "#div_test",
-                        "https://w3id.org/foops/metric/": "#div_metric",
-                        "https://w3id.org/foops/benchmark/": "#div_benchmark"
-                    };
+                function showSection(sectionId) { 
+                    $("#test, #metric, #benchmark").hide(); // Mostrar la sección correspondiente 
+                    $(sectionId).show();
+                } 
+                function updateURL(sectionId) { 
+                    // Actualizar el target de la URL 
+                    window.location.hash = sectionId;
+                } 
 
-                    $("#div_test, #div_metric, #div_benchmark").hide();
+                const currentHash = window.location.hash; 
+                if (!currentHash) { 
+                    // Si no hay marcador en la URL, actualizar a #test 
+                    updateURL("test"); 
+                } 
+                showSection(currentHash || "#test");
 
-                    // Mostrar el div correspondiente al URI o la de "Test" por defecto
-                    const sectionToShow = sections[uri] || "#div_test";
-                    $(sectionToShow).show();
-                }
+                // function showSection(uri) {
+                //     const sections = {
+                //         "https://w3id.org/foops/test/": "#div_test",
+                //         "https://w3id.org/foops/metric/": "#div_metric",
+                //         "https://w3id.org/foops/benchmark/": "#div_benchmark"
+                //     };
+
+                //     $("#div_test, #div_metric, #div_benchmark").hide();
+
+                //     // Mostrar el div correspondiente al URI o la de "Test" por defecto
+                //     const sectionToShow = sections[uri] || "#div_test";
+                //     $(sectionToShow).show();
+                // }
        
-                const currentURI = window.location.href;
-                showSection(currentURI);
+                // const currentURI = window.location.href;
+                // showSection(currentURI);
 
                 $("#btn_metric").click(function(){
-                    showSection('https://w3id.org/foops/metric/');
+                    updateURL("metric"); 
+                    showSection("#metric");
                 });
                 
                 $("#btn_test").click(function(){
-                    showSection('https://w3id.org/foops/test/');
+                    updateURL("test"); 
+                    showSection("#test");
                 });
 
                 $("#btn_benchmark").click(function(){
-                    showSection('https://w3id.org/foops/benchmark/');
+                    updateURL("benchmark"); 
+                    showSection("#benchmark");
                 });
             });
             
@@ -92,7 +111,7 @@
                     <button id="btn_about" type="button" class="btn btn-primary" style="margin-right: 10px;"">About</button>
                 </div>
             </div>
-            <div id = "div_test" data-uri="https://w3id.org/foops/test/" class="container">
+            <div id = "test" class="container">
                 <div class="row text-center">
                     <div class="col-md-12"> <h1>TEST CATALOGUE</h1>
                         <p style="text-align: center;"><h4> Here you can find the list of test that <a href="https://foops.linkeddata.es/FAIR_validator.html#"> FOOPS </a> of <a href="https://oeg.fi.upm.es"> Ontology Engineering Group (OEG) </a> is developing and publishing on the web.</h4></p>
@@ -141,7 +160,7 @@
                     </tbody>
                 </table>
             </div>
-            <div id = "div_metric" data-uri="https://w3id.org/foops/metric/"  class="container">
+            <div id = "metric" class="container">
                 <div class="row text-center">
                     <div class="col-md-12"> <h1>METRICS CATALOGUE</h1>
                         <p style="text-align: center;"> <h4>Here you can find the list of metrics that the <a href="https://oeg.fi.upm.es"> Ontology Engineering Group (OEG) </a> is developing and publishing on the web.</h4></p>
@@ -187,7 +206,7 @@
                     </tbody>
                 </table>
             </div>
-            <div id = "div_benchmark" data-uri="https://w3id.org/foops/benchmark/" class="container">
+            <div id = "benchmark" class="container">
                 <div class="row text-center">
                     <div class="col-md-12"> <h1>BENCHMARK CATALOGUE</h1>
                         <p style="text-align: center;"> <h4>Here you can find the list of benchmarks that the <a href="https://oeg.fi.upm.es"> Ontology Engineering Group (OEG) </a> is developing and publishing on the web.</h4></p>

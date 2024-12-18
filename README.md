@@ -6,22 +6,33 @@ First, the following repository must be downloaded to work on the different docu
 
 https://github.com/oeg-upm/fair_ontologies
 
-```
-path_ttls_benchmarks = "{USER_PATH}/Fair_Ontologies/doc/benchmark/"
-path_ttls_metrics = "{USER_PATH}Fair_Ontologies/doc/metric/"
-path_ttls = "{USER_PATH}/Fair_Ontologies/doc/test/"
-path_catalogo = "{USER_PATH}/Fair_Ontologies/doc/catalog.html"
-```
+The process begins from the terminal, specifying the path where the test.ttl files are located, which are essential to start the process, as well as a destination path where the folder and file structure will be saved. Both parameters are mandatory.
+This process create a catalog of all the documents.
 
-After cloning this repository, it is necessary to configure the paths in the config.ini file. By default, the paths contain the {USER_PATH} placeholder, which must be replaced with the absolute path where this project is located on your machine.
-If the TTL files or the template change location, these paths will need to be updated in the config file.
+The folder structure is usually as follows:
 
-Example:
+doc
+catalog.html
 
-```
-path_ttls_benchmarks = "/home/user/Fair_Ontologies/doc/benchmark/"
+    - test
+        test1
+            test1.ttl
+            test1.html
+            test1.jsonld
+        test2
+        .....
+    - metric
+        metric1
 
-```
+        metric2
+        ....
+    - benchmark
+
+Execution:
+python ttl_transformations.py -i "/path/source/" -o "/path_destination/"
+
+    -i: input (source path)
+    -o: output (destination path)
 
 The process iterates recursively within the root, and if it finds a TTL file, it creates an equivalent file with the same name but with HTML and JSON-LD extensions.
 
@@ -31,17 +42,14 @@ The script requires the rdflib and pystache libraries for proper operation. Both
 
 The main page created from ttl_catalogue.py goes through all test folders and retrieves information to create a catalog item whenever it finds a ttl file in the folder.
 
-It requires specifying the path where the test and metric folders are located and where the template is hosted, from which the catalog will be created to show the list of tests and metrics available.
-
-```
-path_ttls_benchmarks = "{USER_PATH}/Fair_Ontologies/doc/benchmark/"
-path_ttls_metrics = "{USER_PATH}/Fair_Ontologies/doc/metric/"
-path_ttls = "{USER_PATH}/Fair_Ontologies/doc/test/"
-```
-
 By using Markdown within the TTL file, we can customize the formatting of descriptions for all document types (tests, metrics, and benchmarks), resulting in a more user-friendly HTML presentation.
 
-It is possible to register the tests hosted in the GitHub repository in Ostrails (https://tools.ostrails.eu) using the test_register script. All you need to do is configure the paths in the configuration file that the other scripts use. Specifically, these two paths:
+After generating the documents and creating the catalog with them, it is possible to register them on Ostrails (https://tools.ostrails.eu) using the following script. The only requirement is to specify the folder where the test.ttl files created in the previous process are located. This is typically located at path/doc/test/.
+
+Execution:
+python test_register.py -i "/path/doc/test"
+
+It is necessary to configure the registration web service, which is currently:
 
 ```
 path_url_register = "https://tools.ostrails.eu/fdp-index-proxy/proxy"
