@@ -13,7 +13,7 @@ from rdflib import Graph
 QUERY = """
 PREFIX dcterms: <http://purl.org/dc/terms/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX ftr: <https://www.w3id.org/ftr#>
+PREFIX ftr: <https://w3id.org/ftr#>
 PREFIX dcat: <http://www.w3.org/ns/dcat#> 
 
 SELECT DISTINCT ?s ?title ?label ?version ?keywords ?license ?license_label

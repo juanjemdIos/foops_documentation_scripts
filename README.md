@@ -31,7 +31,7 @@ catalog.html
 Execution:
 python ttl_transformations.py -i "/path/source/" -o "/path_destination/"
 
-    -i: input (source path)
+    -i: input (source path). Must be contain the doc folder with the test/test1/test1.ttl
     -o: output (destination path)
 
 The process iterates recursively within the root, and if it finds a TTL file, it creates an equivalent file with the same name but with HTML and JSON-LD extensions.
