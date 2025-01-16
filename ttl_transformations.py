@@ -65,7 +65,7 @@ WHERE {
     ?s dcterms:license ?license .
     ?s dcat:landingPage ?landing_page .
     ?s dqv:inDimension ?indimension .
-    ?s ftr:metricStatus ?metric_status .
+    ?s ftr:status ?metric_status .
     ?s ftr:hasBenchmark ?benchmark .
     ?indimension rdfs:label ?label_dimension .
     ?indimension dcterms:description ?desc_indimension .
@@ -92,7 +92,7 @@ PREFIX doap: <http://usefulinc.com/ns/doap#>
 PREFIX dqv: <http://www.w3.org/ns/dqv#>
 
 SELECT DISTINCT ?s ?title ?label ?description ?keywords ?version ?license
- ?creator_name ?creator_orcid ?landing_page ?benchmark_status ?associatedMetric ?metricIdentifier ?metricLabel ?contact_orcid ?contact_name ?contact_mail
+ ?creator_name ?creator_orcid ?landing_page ?benchmark_status ?hasAssociatedMetric ?metricIdentifier ?metricLabel ?contact_orcid ?contact_name ?contact_mail
 WHERE {
     ?s a ftr:Benchmark .
     ?s dcterms:title ?title .
@@ -105,9 +105,9 @@ WHERE {
     ?s ftr:status ?benchmark_status .
     ?s dcterms:creator ?creator_orcid .
     ?creator_orcid vcard:fn ?creator_name .
-    ?s ftr:associatedMetric ?associatedMetric .
-    ?associatedMetric dcterms:identifier ?metricIdentifier .
-    ?associatedMetric rdfs:label ?metricLabel .
+    ?s ftr:hasAssociatedMetric ?hasAssociatedMetric .
+    ?hasAssociatedMetric dcterms:identifier ?metricIdentifier .
+    ?hasAssociatedMetric rdfs:label ?metricLabel .
     ?s dcat:contactPoint ?contact_orcid .
     ?contact_orcid vcard:fn ?contact_name .
     ?contact_orcid vcard:hasEmail ?contact_mail .
