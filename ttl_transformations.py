@@ -11,7 +11,7 @@ QUERY = """
 PREFIX dcterms: <http://purl.org/dc/terms/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX dcat: <http://www.w3.org/ns/dcat#>
-PREFIX ftr: <https://www.w3id.org/ftr#>
+PREFIX ftr: <https://w3id.org/ftr#>
 PREFIX dqv: <http://www.w3.org/ns/dqv#>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX doap: <http://usefulinc.com/ns/doap#>
@@ -46,7 +46,7 @@ QUERY_METRICS = """
 PREFIX dcterms: <http://purl.org/dc/terms/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX dcat: <http://www.w3.org/ns/dcat#>
-PREFIX ftr: <https://www.w3id.org/ftr#>
+PREFIX ftr: <https://w3id.org/ftr#>
 PREFIX dqv: <http://www.w3.org/ns/dqv#>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX doap: <http://usefulinc.com/ns/doap#>
@@ -65,7 +65,7 @@ WHERE {
     ?s dcterms:license ?license .
     ?s dcat:landingPage ?landing_page .
     ?s dqv:inDimension ?indimension .
-    ?s ftr:metricStatus ?metric_status .
+    ?s ftr:status ?metric_status .
     ?s ftr:hasBenchmark ?benchmark .
     ?indimension rdfs:label ?label_dimension .
     ?indimension dcterms:description ?desc_indimension .
@@ -85,14 +85,14 @@ QUERY_BENCHMARK = """
 PREFIX dcterms: <http://purl.org/dc/terms/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX dcat: <http://www.w3.org/ns/dcat#>
-PREFIX ftr: <https://www.w3id.org/ftr#>
+PREFIX ftr: <https://w3id.org/ftr#>
 PREFIX dqv: <http://www.w3.org/ns/dqv#>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX doap: <http://usefulinc.com/ns/doap#>
 PREFIX dqv: <http://www.w3.org/ns/dqv#>
 
 SELECT DISTINCT ?s ?title ?label ?description ?keywords ?version ?license
- ?creator_name ?creator_orcid ?landing_page ?benchmark_status ?associatedMetric ?metricIdentifier ?metricLabel ?contact_orcid ?contact_name ?contact_mail
+ ?creator_name ?creator_orcid ?landing_page ?benchmark_status ?hasAssociatedMetric ?metricIdentifier ?metricLabel ?contact_orcid ?contact_name ?contact_mail
 WHERE {
     ?s a ftr:Benchmark .
     ?s dcterms:title ?title .
@@ -105,9 +105,9 @@ WHERE {
     ?s ftr:status ?benchmark_status .
     ?s dcterms:creator ?creator_orcid .
     ?creator_orcid vcard:fn ?creator_name .
-    ?s ftr:associatedMetric ?associatedMetric .
-    ?associatedMetric dcterms:identifier ?metricIdentifier .
-    ?associatedMetric rdfs:label ?metricLabel .
+    ?s ftr:hasAssociatedMetric ?hasAssociatedMetric .
+    ?hasAssociatedMetric dcterms:identifier ?metricIdentifier .
+    ?hasAssociatedMetric rdfs:label ?metricLabel .
     ?s dcat:contactPoint ?contact_orcid .
     ?contact_orcid vcard:fn ?contact_name .
     ?contact_orcid vcard:hasEmail ?contact_mail .
@@ -117,7 +117,7 @@ WHERE {
 QUERY_CATALOG_TTL = """
 PREFIX dcterms: <http://purl.org/dc/terms/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX ftr: <https://www.w3id.org/ftr#>
+PREFIX ftr: <https://w3id.org/ftr#>
 PREFIX dcat: <http://www.w3.org/ns/dcat#> 
 
 SELECT DISTINCT ?s ?title ?label ?version ?keywords ?license ?license_label
@@ -154,7 +154,7 @@ PREFIX dcterms: <http://purl.org/dc/terms/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX dqv: <http://www.w3.org/ns/dqv#>
 PREFIX dcat: <http://www.w3.org/ns/dcat#> 
-PREFIX ftr: <https://www.w3id.org/ftr#>
+PREFIX ftr: <https://w3id.org/ftr#>
 
 SELECT DISTINCT ?s ?title ?label ?version ?keywords ?license ?license_label
 WHERE {
@@ -335,7 +335,6 @@ def ttl_to_html_benchmarks(path_ttl, path_mustache, pquery):
     contacts_mail = []
 
     for row in results:
-
         data['benchmark_identifier'] = row.s
         data['benchmark_title'] = row.title
         data['benchmark_name'] = row.label
@@ -347,6 +346,7 @@ def ttl_to_html_benchmarks(path_ttl, path_mustache, pquery):
         data['benchmark_turtle'] = row.label.replace('Benchmark ', '') + '.ttl'
 
         if str(row.keywords) not in keywords:
+            
             keywords.append(str(row.keywords))
 
         if str(row.creator_name) not in creators:
@@ -370,6 +370,7 @@ def ttl_to_html_benchmarks(path_ttl, path_mustache, pquery):
         if str(row.contact_mail) not in contacts_mail:
             contacts_mail.append(str(row.contact_mail))
 
+      
         all_keywords = ", ".join(keywords)
 
         result = []
